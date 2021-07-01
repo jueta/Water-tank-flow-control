@@ -5,14 +5,19 @@
 
 using namespace std;
 
-double qIn = 50;    //, qIn2, qIn3;
-double h1 = 50;    //, h2, h3;
-double qNext1 = 10;   //
+double qIn = 100;  
+double qIn2 = 50; 
+double qIn3 = 10;
+
+double h1 = 50;  
+double h2 = 30;
+double h3 = 10;
 
 
 // The function we want to execute on the new thread.
-double dinamic_equation1(double h1, double t) {
+double dinamic_equation1(double h1, double t) {  // h1 = instantaneous height value  /  t = time
 
+    //tank 1 properties
     double H = 2.5;
     double rzin = 5;
     double rzao = 10;
@@ -24,7 +29,7 @@ double dinamic_equation1(double h1, double t) {
     double den;
     double aux;
 
-    num = (qIn - qOut) - qNext1;
+    num = (qIn - qOut) - qIn2;
     aux = (rzao - rzin) / H;
     den = pi * (rzin + aux);
     den = den * h1;
@@ -36,6 +41,57 @@ double dinamic_equation1(double h1, double t) {
     return h1Dot;
 }
 
+double dinamic_equation2(double h2, double t) {  // h2 = instantaneous height value  /  t = time
+
+    //tank 2 properties
+    double H = 2.5;
+    double rzin = 5;
+    double rzao = 10;
+    double qOut = 5;   //gama raiz de hi(t)
+    double pi = 3.14;
+
+    double h2Dot;
+    double num;
+    double den;
+    double aux;
+
+    num = (qIn2 - qOut) - qIn3;
+    aux = (rzao - rzin) / H;
+    den = pi * (rzin + aux);
+    den = den * h2;
+    den = pow(den, 2);
+    h2Dot = num / den;
+
+    std::cout << h2Dot << "\n";
+
+    return h2Dot;
+}
+
+double dinamic_equation3(double h3, double t) {  // h3 = instantaneous height value  /  t = time
+
+    //tank 3 properties
+    double H = 2.5;
+    double rzin = 5;
+    double rzao = 10;
+    double qOut = 5;   //gama raiz de hi(t)
+    double pi = 3.14;
+
+    double h3Dot;
+    double num;
+    double den;
+    double aux;
+
+    num = qIn3 - qOut;
+    aux = (rzao - rzin) / H;
+    den = pi * (rzin + aux);
+    den = den * h3;
+    den = pow(den, 2);
+    h3Dot = num / den;
+
+    std::cout << h3Dot << "\n";
+
+    return h3Dot;
+}
 
 double runge_kutta(double xn, int n) {  // xn = calculation point  /  n = number of steps
 
@@ -72,8 +128,7 @@ double runge_kutta(double xn, int n) {  // xn = calculation point  /  n = number
 
 
 
-void proc_thread_1(string msg)
-{
+void proc_thread_1(string msg) {
 
     std::cout << "task1 says: " << msg << "\n";
 
@@ -87,15 +142,44 @@ void proc_thread_1(string msg)
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
+void proc_thread_2(string msg) {
+
+    std::cout << "task2 says: " << msg << "\n";
+
+    double resp = dinamic_equation2(10, 50);
+    double test = runge_kutta(20, 3);
+
+    std::cout << resp << "\n" << "resp1..." << "\n";
+    std::cout << test << "\n" << "resp2..." << "\n";
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+
+
+void proc_thread_3(string msg) {
+
+    std::cout << "task3 says: " << msg << "\n";
+
+    double resp = dinamic_equation3(10, 50);
+    double test = runge_kutta(20, 3);
+
+    std::cout << resp << "\n" << "resp1..." << "\n";
+    std::cout << test << "\n" << "resp2..." << "\n";
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+
 int main() {
 
-    // Constructs the new thread and runs it. Does not block execution.
 
     thread t1(proc_thread_1, "Hello");
-    //thread tank2(tank_task);
-    //thread tank3(tank_task);
+    thread t2(proc_thread_2, "YOUR");
+    thread t3(proc_thread_3, "PUSSY");
 
-    // Makes the main thread wait for the new thread to finish execution, therefore blocks its own execution.
    t1.join();
+   t2.join();
+   t3.join();
 
 }
