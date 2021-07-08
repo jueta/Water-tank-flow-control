@@ -5,13 +5,22 @@
 
 using namespace std;
 
+//Initial Values of Entry flow
 double qIn = 100;  
 double qIn2 = 50; 
 double qIn3 = 10;
 
+//Initial values of instantaneous Height
 double h1 = 50;  
 double h2 = 30;
 double h3 = 10;
+
+
+//Initial values of controllable references
+double hc1 = 50;
+double hc2 = 30;
+double hc3 = 10;
+
 
 
 // The function we want to execute on the new thread.
@@ -21,13 +30,15 @@ double dinamic_equation1(double h1, double t) {  // h1 = instantaneous height va
     double H = 2.5;
     double rzin = 5;
     double rzao = 10;
-    double qOut = 5;   //gama raiz de hi(t)
     double pi = 3.14;
 
     double h1Dot;
     double num;
     double den;
     double aux;
+    double qOut;   //gama raiz de hi(t)
+
+    qOut = qout(1, h1);
 
     num = (qIn - qOut) - qIn2;
     aux = (rzao - rzin) / H;
@@ -47,13 +58,15 @@ double dinamic_equation2(double h2, double t) {  // h2 = instantaneous height va
     double H = 2.5;
     double rzin = 5;
     double rzao = 10;
-    double qOut = 5;   //gama raiz de hi(t)
     double pi = 3.14;
 
+    double qOut;   //gama raiz de hi(t)
     double h2Dot;
     double num;
     double den;
     double aux;
+
+    qOut = qout(2, h2);
 
     num = (qIn2 - qOut) - qIn3;
     aux = (rzao - rzin) / H;
@@ -73,13 +86,15 @@ double dinamic_equation3(double h3, double t) {  // h3 = instantaneous height va
     double H = 2.5;
     double rzin = 5;
     double rzao = 10;
-    double qOut = 5;   //gama raiz de hi(t)
     double pi = 3.14;
 
+    double qOut;   //gama raiz de hi(t)
     double h3Dot;
     double num;
     double den;
     double aux;
+
+    qOut = qout(3, h3);
 
     num = qIn3 - qOut;
     aux = (rzao - rzin) / H;
@@ -126,7 +141,29 @@ double runge_kutta(double xn, int n) {  // xn = calculation point  /  n = number
     return yn;
 }
 
+double qout(int tank, double h) {
+    
+    double qo;
+    double gama;
 
+    if (tank == 1) {
+        h = h1;
+        gama = 3;
+    }
+    else if (tank == 2) {
+        h = h2;
+        gama = 2;
+    }
+    else {
+        h = h3;
+        gama = 1;
+    }
+
+    qo = gama * sqrt(h);
+
+    return qo;
+
+}
 
 void proc_thread_1(string msg) {
 
@@ -178,8 +215,8 @@ int main() {
     thread t2(proc_thread_2, "YOUR");
     thread t3(proc_thread_3, "PUSSY");
 
-   t1.join();
-   t2.join();
-   t3.join();
+    t1.join();
+    t2.join();
+    t3.join();
 
 }
