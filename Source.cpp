@@ -6,9 +6,9 @@
 using namespace std;
 
 //Initial Values of Entry flow
-double qIn1 = 100;  
-double qIn2 = 50; 
-double qIn3 = 10;
+double qIn1;  
+double qIn2; 
+double qIn3;
 
 //Initial values of instantaneous Height
 double h1;
@@ -22,7 +22,7 @@ double hr3;
 
 double qout(int tank, double h);
 
-// The function we want to execute on the new thread.
+//FUNCTIONS
 double dinamic_equation1(double t, double h1) {  // h1 = instantaneous height value  /  t = time
 
     //tank 1 properties
@@ -51,12 +51,12 @@ double dinamic_equation1(double t, double h1) {  // h1 = instantaneous height va
     return h1Dot;
 }
 
-double dinamic_equation2(double h2, double t) {  // h2 = instantaneous height value  /  t = time
+double dinamic_equation2(double t, double h2) {  // h2 = instantaneous height value  /  t = time
 
     //tank 2 properties
-    double H = 2.5;
+    double H = 15;
     double rzin = 5;
-    double rzao = 10;
+    double rzao = 25;
     double pi = 3.14;
 
     double qOut;   //gama raiz de hi(t)
@@ -74,16 +74,16 @@ double dinamic_equation2(double h2, double t) {  // h2 = instantaneous height va
     den = pow(den, 2);
     h2Dot = num / den;
 
-    std::cout << h2Dot << "\n";
+   // std::cout << h2Dot << "\n";
 
     return h2Dot;
 }
 
-double dinamic_equation3(double h3, double t) {  // h3 = instantaneous height value  /  t = time
+double dinamic_equation3(double t, double h3) {  // h3 = instantaneous height value  /  t = time
 
     //tank 3 properties
-    double H = 2.5;
-    double rzin = 5;
+    double H = 10;
+    double rzin = 3;
     double rzao = 10;
     double pi = 3.14;
 
@@ -102,7 +102,7 @@ double dinamic_equation3(double h3, double t) {  // h3 = instantaneous height va
     den = pow(den, 2);
     h3Dot = num / den;
 
-    std::cout << h3Dot << "\n";
+   // std::cout << h3Dot << "\n";
 
     return h3Dot;
 }
@@ -156,9 +156,15 @@ double qout(int tank, double h) {
 
 }
 
+
+//THREADS
+
 void softPLC_thread(string msg) {
 
     std::cout << "Controller says: " << msg << "\n";
+
+    // Initial value
+    qIn1 = 100;
 
     while (1) {
 
@@ -185,7 +191,7 @@ void proc_thread_1(string msg) {
         h1 = runge_kutta(1, 3, t, 0.5);  // double t0, double h0, double t, double stepsize
 
        // std::cout <<  " resp1: " << "\n" << resp << "\n" ;
-        std::cout << "\n" << " resposta do sistema (hn): " << h1 << "  no Instante: " << t << "\n";
+        std::cout << "\n" << " resposta do sistema (hn): " << h1 << " no Instante: " << t << "\n";
 
         t++;
 
@@ -208,7 +214,6 @@ void proc_thread_2(string msg) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
-
 void proc_thread_3(string msg) {
 
     std::cout << "task3 says: " << msg << "\n";
@@ -223,6 +228,9 @@ void proc_thread_3(string msg) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
+
+
+//MAIN
 int main() {
 
     cout << "digite a referencia para o tanque 1: ";
@@ -234,8 +242,8 @@ int main() {
    // thread t3(proc_thread_3, "...Tank 3 started");
     thread controller(softPLC_thread, "...softPLC started");
 
-    while (h1 != hr1);
 
+    while (h1 != hr1);
     t1.join();
     controller.join();
 
