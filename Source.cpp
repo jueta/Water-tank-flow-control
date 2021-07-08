@@ -2,8 +2,13 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include "semaforo.hpp"
+
 
 using namespace std;
+
+semaforo semaforo1;
+
 
 //Initial Values of Entry flow
 double qIn1;  
@@ -174,8 +179,11 @@ void softPLC_thread(string msg) {
         else if (h1 < hr1) {
             qIn1++;
         }
+    
+        cout << "Free" << "\n";
+        semaforo1.signal();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
     }
 
@@ -186,10 +194,13 @@ void proc_thread_1(string msg) {
     std::cout << "task1 says: " << msg << "\n";
     int t = 0;
 
+
     while (1) {
 
+        cout << "Waiting" << "\n";
+        semaforo1.wait();
         h1 = runge_kutta(1, 3, t, 0.5);  // double t0, double h0, double t, double stepsize
-
+        cout << "Done" << "\n";
        // std::cout <<  " resp1: " << "\n" << resp << "\n" ;
         std::cout << "\n" << " resposta do sistema (hn): " << h1 << " no Instante: " << t << "\n";
 
