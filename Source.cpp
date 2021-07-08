@@ -6,20 +6,19 @@
 using namespace std;
 
 //Initial Values of Entry flow
-double qIn = 100;  
+double qIn1 = 100;  
 double qIn2 = 50; 
 double qIn3 = 10;
 
 //Initial values of instantaneous Height
-double h1;// = 50;
-double h2;// = 30;
-double h3;// = 10;
-
+double h1;
+double h2;
+double h3;
 
 //Initial values of controllable references
-double hc1 = 50;
-double hc2 = 30;
-double hc3 = 10;
+double hr1;
+double hr2;
+double hr3;
 
 double qout(int tank, double h);
 
@@ -40,7 +39,7 @@ double dinamic_equation1(double t, double h1) {  // h1 = instantaneous height va
 
     qOut = qout(1, h1);
 
-    num = (qIn - qOut) - qIn2;
+    num = (qIn1 - qOut) - qIn2;
     aux = (rzao - rzin) / H;
     den = pi * (rzin + aux);
     den = den * h1;
@@ -130,9 +129,6 @@ double runge_kutta(double t0, double h0, double t, double stepsize) {
 
     }
 
-    /* Displaying result */
-   // cout << "\n " << " hn:  " << hn;
-
     return hn;
 }
 
@@ -160,17 +156,42 @@ double qout(int tank, double h) {
 
 }
 
+void softPLC_thread(string msg) {
+
+    std::cout << "Controller says: " << msg << "\n";
+
+    while (1) {
+
+        if (h1 > hr1) {
+            qIn1--;
+        }
+        else if (h1 < hr1) {
+            qIn1++;
+        }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    
+    }
+
+}
+
 void proc_thread_1(string msg) {
 
     std::cout << "task1 says: " << msg << "\n";
+    int t = 0;
 
-    double test = runge_kutta(1, 3, 25, 0.5);  // double t0, double h0, double t, double stepsize
+    while (1) {
 
-   // std::cout <<  " resp1: " << "\n" << resp << "\n" ;
-    std::cout << "\n" << " resposta do sistema (hn) no ponto 25: "<< test << "\n";
+        h1 = runge_kutta(1, 3, t, 0.5);  // double t0, double h0, double t, double stepsize
 
+       // std::cout <<  " resp1: " << "\n" << resp << "\n" ;
+        std::cout << "\n" << " resposta do sistema (hn): " << h1 << "  no Instante: " << t << "\n";
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        t++;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
 }
 
 void proc_thread_2(string msg) {
@@ -204,14 +225,21 @@ void proc_thread_3(string msg) {
 
 int main() {
 
-    std::cout << "\n" << " altura inicial do tanque 1: " << h1 << "\n";
+    cout << "digite a referencia para o tanque 1: ";
 
+    cin >> hr1;
 
     thread t1(proc_thread_1, "...Tank 1 started");
    // thread t2(proc_thread_2, "...Tank 2 started");
    // thread t3(proc_thread_3, "...Tank 3 started");
+    thread controller(softPLC_thread, "...softPLC started");
+
+    while (h1 != hr1);
 
     t1.join();
+    controller.join();
+
+   // t1.join();
     //t2.join();
     //t3.join();
 
