@@ -11,9 +11,9 @@ double qIn2 = 50;
 double qIn3 = 10;
 
 //Initial values of instantaneous Height
-double h1 = 50;  
-double h2 = 30;
-double h3 = 10;
+double h1;// = 50;
+double h2;// = 30;
+double h3;// = 10;
 
 
 //Initial values of controllable references
@@ -21,15 +21,15 @@ double hc1 = 50;
 double hc2 = 30;
 double hc3 = 10;
 
-
+double qout(int tank, double h);
 
 // The function we want to execute on the new thread.
-double dinamic_equation1(double h1, double t) {  // h1 = instantaneous height value  /  t = time
+double dinamic_equation1(double t, double h1) {  // h1 = instantaneous height value  /  t = time
 
     //tank 1 properties
-    double H = 2.5;
-    double rzin = 5;
-    double rzao = 10;
+    double H = 25;
+    double rzin = 10;
+    double rzao = 50;
     double pi = 3.14;
 
     double h1Dot;
@@ -47,7 +47,7 @@ double dinamic_equation1(double h1, double t) {  // h1 = instantaneous height va
     den = pow(den, 2);
     h1Dot = num / den;
 
-    std::cout << h1Dot << "\n";
+   // std::cout <<  "  H1Dot: " << h1Dot << "\n";
 
     return h1Dot;
 }
@@ -108,37 +108,32 @@ double dinamic_equation3(double h3, double t) {  // h3 = instantaneous height va
     return h3Dot;
 }
 
-double runge_kutta(double xn, int n) {  // xn = calculation point  /  n = number of steps
+double runge_kutta(double t0, double h0, double t, double stepsize) {  
 
-    double x0, y0, h, yn, k1, k2, k3, k4, k;
-    int i;
+    double k1, k2, k3, k4;
 
-    x0 = 2; // seed value
-    y0 = 5; //seed value
-
-    /* Calculating step size (h) */
-    h = (xn - x0) / n;
+    int n = (int)((t - t0) / stepsize);
 
     /* Runge Kutta Method */
-    cout << "\nx0\ty0\tyn\n";
-    cout << "------------------\n";
-    for (i = 0; i < n; i++)
-    {
-        k1 = h * (dinamic_equation1(x0, y0));
-        k2 = h * (dinamic_equation1((x0 + h / 2), (y0 + k1 / 2)));
-        k3 = h * (dinamic_equation1((x0 + h / 2), (y0 + k2 / 2)));
-        k4 = h * (dinamic_equation1((x0 + h), (y0 + k3)));
-        k = (k1 + 2 * k2 + 2 * k3 + k4) / 6;
-        yn = y0 + k;
-        cout << x0 << "\t" << y0 << "\t" << yn << endl;
-        x0 = x0 + h;
-        y0 = yn;
+    double hn = h0;
+
+    for (int i = 1; i <= n; i++) {
+       
+        k1 = stepsize * dinamic_equation1(t0, hn);
+        k2 = stepsize * dinamic_equation1(t0 + 0.5 * stepsize, hn + 0.5 * k1);
+        k3 = stepsize * dinamic_equation1(t0 + 0.5 * stepsize, hn + 0.5 * k2);
+        k4 = stepsize * dinamic_equation1(t0 + stepsize, hn + k3);
+
+        
+        hn = hn + (1.0 / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4);;
+        t0 = t0 + stepsize;
+
     }
 
     /* Displaying result */
-    cout << "\nValue of y at x = " << xn << " is " << yn;
+   // cout << "\n " << " hn:  " << hn;
 
-    return yn;
+    return hn;
 }
 
 double qout(int tank, double h) {
@@ -169,11 +164,10 @@ void proc_thread_1(string msg) {
 
     std::cout << "task1 says: " << msg << "\n";
 
-    double resp = dinamic_equation1(10, 50);
-    double test = runge_kutta(20, 3);
+    double test = runge_kutta(1, 3, 25, 0.5);  // double t0, double h0, double t, double stepsize
 
-    std::cout << resp << "\n" << "resp1..." << "\n";
-    std::cout << test << "\n" << "resp2..." << "\n";
+   // std::cout <<  " resp1: " << "\n" << resp << "\n" ;
+    std::cout << "\n" << " resposta do sistema (hn) no ponto 25: "<< test << "\n";
 
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -184,10 +178,10 @@ void proc_thread_2(string msg) {
     std::cout << "task2 says: " << msg << "\n";
 
     double resp = dinamic_equation2(10, 50);
-    double test = runge_kutta(20, 3);
+   // double test = runge_kutta(20, 3);
 
     std::cout << resp << "\n" << "resp1..." << "\n";
-    std::cout << test << "\n" << "resp2..." << "\n";
+    //std::cout << test << "\n" << "resp2..." << "\n";
 
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -199,10 +193,10 @@ void proc_thread_3(string msg) {
     std::cout << "task3 says: " << msg << "\n";
 
     double resp = dinamic_equation3(10, 50);
-    double test = runge_kutta(20, 3);
+   // double test = runge_kutta(20, 3);
 
     std::cout << resp << "\n" << "resp1..." << "\n";
-    std::cout << test << "\n" << "resp2..." << "\n";
+   // std::cout << test << "\n" << "resp2..." << "\n";
 
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -210,13 +204,15 @@ void proc_thread_3(string msg) {
 
 int main() {
 
+    std::cout << "\n" << " altura inicial do tanque 1: " << h1 << "\n";
 
-    thread t1(proc_thread_1, "Hello");
-    thread t2(proc_thread_2, "YOUR");
-    thread t3(proc_thread_3, "PUSSY");
+
+    thread t1(proc_thread_1, "...Tank 1 started");
+   // thread t2(proc_thread_2, "...Tank 2 started");
+   // thread t3(proc_thread_3, "...Tank 3 started");
 
     t1.join();
-    t2.join();
-    t3.join();
+    //t2.join();
+    //t3.join();
 
 }
