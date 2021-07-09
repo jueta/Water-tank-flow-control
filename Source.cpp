@@ -1,9 +1,23 @@
+/*
+*                   UFMG
+*       TRABALHO AUTOMACAO EM TEMPO REAL
+*       ALUNO: JOAO PEDRO MIRANDA MARQUES
+*       MATRICULA: 2017050495
+*       PARTE 1
+*
+*/
+
+
+
+
+
 #include <string>
 #include <iostream>
 #include <thread>
 #include <chrono>
 #include "semaforo.hpp"
 
+#define CONTROLLER_PERIOD 200
 
 using namespace std;
 
@@ -244,7 +258,7 @@ void softPLC_thread(string msg) {
         cout << "Free 3" << "\n";
         semaforo3.signal();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(CONTROLLER_PERIOD));
     }
 
 }
