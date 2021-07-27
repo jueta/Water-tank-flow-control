@@ -15,6 +15,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <fstream>
 #include "semaforo.hpp"
 
 #define CONTROLLER_PERIOD 100
@@ -383,13 +384,24 @@ void interface_thread(string msg) {
     }
 }
 
-
+//Thread that writes the values in a file
 void logger_thread(string msg) {
+
+    std::cout << "File Writer says: " << msg << "\n";
+
+    ofstream myfile;
+
+
 
     while (1) {
 
+        myfile.open("example.txt", ios::out | ios::app);
+        myfile << h1 << ", " << h2 << ", " << h3 << ", " <<"\n";
+        myfile.close();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
     }
+
 }
 
 //MAIN
@@ -406,6 +418,7 @@ int main() {
     thread t2(proc_thread_2, "...Tank 2 started");
     thread t3(proc_thread_3, "...Tank 3 started");
     thread interface(interface_thread, "...HMI started");
+    thread logger(logger_thread, "...File Writer started");
     thread controller(softPLC_thread, "...softPLC started");
 
     int a = 0;
