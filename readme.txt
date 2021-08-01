@@ -17,6 +17,10 @@ Como usar:
 	-> "task x Done": Quando a saida do processo tiver sido calculada (altura de agua no tanque).
 	-> "resposta do sistema x no instante y": Saida do processo x no instante de tempo y.
 
+  - Caso queira alterar os valores, pode digitar qualquer tecla que ira acionar a funcao de entrada de valores
+	-> Neste momento voce podera escolher quantos tanques deseja alterar
+	-> Em seguida vai perguntar qual tanque deseja alterar a referencia
+	-> Em seguida digite os valores de referencia.
 
 Configuracoes no codigo:
  - Formato e volume do tanque: Dentro de cada dinamic_equation pode-se setar os valores de altura do tanque (H), raio inferior (rzin) e raio superior (rzao).
